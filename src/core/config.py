@@ -1,10 +1,13 @@
 import os
 import secrets
+from pathlib import Path
 from typing import Annotated, Any
 
 from pydantic import AnyUrl, BeforeValidator, EmailStr, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -19,7 +22,7 @@ class Configs(BaseSettings):
     # Define environment variables or default values for configuration
     ENV: str = "local"
     model_config = SettingsConfigDict(
-        env_file="../.env",
+        env_file=PROJECT_ROOT / ".env",
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -55,17 +58,10 @@ class Configs(BaseSettings):
     FIRST_SUPERUSER: EmailStr | None = None
     FIRST_SUPERUSER_PASSWORD: str | None = None
 
-    SMTP_TLS: bool = True
-    SMTP_SSL: bool = False
-    SMTP_PORT: int = 587
-    SMTP_HOST: str | None = None
-    SMTP_USER: str | None = None
-    SMTP_PASSWORD: str | None = None
-
 
 class TestConfigs(Configs):
     model_config = SettingsConfigDict(
-        env_file="../../../.env.testing",
+        env_file=PROJECT_ROOT / ".env.testing",
         env_ignore_empty=True,
         extra="ignore",
     )
