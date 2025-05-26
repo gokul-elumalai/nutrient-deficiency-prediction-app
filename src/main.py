@@ -12,33 +12,6 @@ from core.config import configs
 
 app = FastAPI()
 
-# model = joblib.load("model/nutrient_model.pkl")
-# features = joblib.load("model/model_features.pkl")
-# targets = [f"{f}_deficient" for f in ['protein', 'iron', 'calcium', 'vitamin_c', 'fiber']]
-
-
-class NutritionInput(BaseModel):
-    calories: float
-    protein: float
-    fat: float
-    carbs: float
-    fiber: float
-    iron: float
-    calcium: float
-    vitamin_c: float
-
-
-@app.post("/predict")
-def predict_deficiencies(data: NutritionInput):
-    input_array = np.array([[getattr(data, f) for f in features]])
-    prediction = model.predict(input_array)[0]
-    pred_dict = dict(zip(targets, prediction))
-    recs = get_food_recommendations(pred_dict)
-    return {
-        "deficiencies": [k for k, v in pred_dict.items() if v == 1],
-        "recommendations": recs
-    }
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=configs.CORS_ALLOWED_ORIGINS,
@@ -49,8 +22,8 @@ app.add_middleware(
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    j = get_password_hash("stringst")
-    return {"message": f"{configs.PROJECT_NAME} {j}"}
+
+    return {"message": f"{configs.PROJECT_NAME}"}
 
 
 app.include_router(v1_routers, prefix=configs.API_V1_STR)
