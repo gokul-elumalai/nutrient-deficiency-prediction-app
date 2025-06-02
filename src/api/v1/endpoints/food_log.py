@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from typing import Any, List
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlmodel import select
+from sqlmodel import select, func
 
 from models.message import Message
 from src.api.v1.debs import CurrentUser, SessionDep, get_current_active_superuser
@@ -161,23 +161,32 @@ def read_food_logs(
 
 @router.get("/latest/")
 def read_latest_food_logs(
-        *,
-        session: SessionDep,
-        current_user: CurrentUser,
-        days: int,
-        skip: int = 0,
-        limit: int = 100,
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
+    limit: int = 100,
 ) -> Any:
-    from_date = date.today() - timedelta(days)
-    to_date = date.today()
-    print(from_date, to_date)
+    # Get the most recent log_date for the user
+    latest_date_query = select(func.max(FoodLog.log_date)).where(FoodLog.user_id == current_user.id)
+    latest_log_date = session.exec(latest_date_query).one()
 
-    query = select(FoodLog).where(FoodLog.user_id == current_user.id,
-                                  FoodLog.log_date >= from_date, FoodLog.log_date <= to_date)
+    if not latest_log_date:
+        return []
+
+    from_date = latest_log_date - timedelta(days=6)  # Includes today + 6 previous days
+    to_date = latest_log_date
+
+    # Query for the logs in that range
+    query = select(FoodLog).where(
+        FoodLog.user_id == current_user.id,
+        FoodLog.log_date >= from_date,
+        FoodLog.log_date <= to_date
+    )
 
     food_logs = session.exec(query.offset(skip).limit(limit)).all()
-
     return food_logs
+
 
 
 RECOMMENDED_VALUES = {
