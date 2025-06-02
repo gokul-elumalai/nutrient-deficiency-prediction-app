@@ -17,7 +17,7 @@ class DietPredictor:
         self.model = self._load_model(model_path)
 
     @staticmethod
-    def _load_model(self, model_path: str):
+    def _load_model(model_path: str):
         """Load the trained model"""
         model_file = Path(__file__).parent / model_path
         if not model_file.exists():
@@ -25,7 +25,7 @@ class DietPredictor:
         return joblib.load(model_file)
 
     @staticmethod
-    def _get_bmi_class(self, bmi: int) -> str:
+    def _get_bmi_class(bmi: int) -> str:
         BMI_CLASS = {'underweight': (0, 18.49),
                'normal': (18.5, 24.99),
                'overweight': (25, 29.99),
