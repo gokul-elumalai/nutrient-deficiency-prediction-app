@@ -76,7 +76,7 @@ class FoodLogRead(FoodLogBase):
 
 
 class FoodLogPublic(FoodLogBase):
-    pass
+    id: uuid.UUID
 
 
 class FoodLogsPublic(SQLModel):
