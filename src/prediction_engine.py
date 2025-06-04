@@ -40,7 +40,6 @@ class DietPredictor:
 
     def _preprocess_input(self, user_details: dict):
         user_details = {k.lower(): v for k, v in user_details.items()}
-        user_details[BMI] = self._get_bmi_class(user_details[BMI])
 
         record_df = pd.DataFrame([user_details])
 
@@ -49,15 +48,30 @@ class DietPredictor:
 
         return record_df
 
-    def predict(self, user_details: SQLModel) -> str:
+    def predict(self, user_details: SQLModel, food_log_count: int) -> str:
         """Predict diet plan"""
-        # input_data = self.preprocess_input(user_details)
-        pipeline = self.model["pipeline"]
         input_data = json.loads(user_details.json())
+        input_data[BMI] = self._get_bmi_class(input_data[BMI])
+
+        # if log count is less go to fallback
+        if food_log_count < 21:
+            return self._fallback_diet(input_data[BMI])
+
+        pipeline = self.model["pipeline"]
         record = self._preprocess_input(input_data)
         prediction = pipeline.predict(record)[0]
 
         return prediction
+
+    @staticmethod
+    def _fallback_diet(bmi_class: str) -> str:
+        fallback_map = {
+            "underweight": "Balanced",
+            "normal": "Balanced",
+            "overweight": "High Protein",
+            "obese": "Low Fat"
+        }
+        return fallback_map.get(bmi_class, "Balanced")
 
 
 # Singleton instance
