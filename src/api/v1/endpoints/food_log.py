@@ -115,7 +115,7 @@ def delete_food_log(
 
     session.delete(food_log)
     session.commit()
-    return Message(detail="Food log deleted successfully")
+    return Message(message="Food log deleted successfully")
 
 
 @router.get("/", response_model=FoodLogsPublic)
