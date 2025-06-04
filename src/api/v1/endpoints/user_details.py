@@ -138,7 +138,7 @@ def delete_user_details(
 
     session.delete(details)
     session.commit()
-    return Message(detail="User details deleted successfully")
+    return Message(message="User details deleted successfully")
 
 
 @router.get("/all", response_model=List[UserDetailsPublic])
