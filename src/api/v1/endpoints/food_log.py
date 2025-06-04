@@ -207,8 +207,20 @@ RECOMMENDED_VALUES = {
 
 @router.get("/nutrition-summary/")
 def get_nutrition_summary(*, session: SessionDep, current_user=CurrentUser):
-    past_week = date.today() - timedelta(days=7)
-    query = select(FoodLog).where(FoodLog.user_id == current_user.id, FoodLog.log_date >= past_week)
+    latest_date_query = select(func.max(FoodLog.log_date)).where(FoodLog.user_id == current_user.id)
+    latest_log_date = session.exec(latest_date_query).one()
+
+    if not latest_log_date:
+        return []
+
+    from_date = latest_log_date - timedelta(days=6)  # Includes today + 6 previous days
+    to_date = latest_log_date
+
+    query = select(FoodLog).where(
+        FoodLog.user_id == current_user.id,
+                    FoodLog.log_date >= from_date,
+                    FoodLog.log_date <= to_date
+    )
     logs = session.exec(query).all()
 
     totals = defaultdict(float)
