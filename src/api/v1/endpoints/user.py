@@ -1,5 +1,5 @@
 import uuid
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -101,23 +101,28 @@ def update_user(
 
 
 @router.delete(
-    "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
+    "/delete",
     response_model=Message,
 )
 def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+    session: SessionDep,
+        current_user: CurrentUser,
+        confirmation_pwd: str,
+        user_id: Optional[uuid.UUID] = None
 ) -> Message:
     """
     Delete a user.
     """
-    user = session.get(User, user_id)
+    target_user_id = user_id if user_id else current_user.id
+
+    user = session.get(User, target_user_id)
+
+    user = crud.authenticate(
+        session=session, email=user.email, password=confirmation_pwd
+    )
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user == current_user:
-        raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
-        )
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+
 
     message = crud.delete_user(session=session, db_user=user)
     return message
