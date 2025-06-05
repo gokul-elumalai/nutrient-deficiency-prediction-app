@@ -6,6 +6,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlmodel import select, func
 
+from crud.user_details import update_user_nutrition_summary
 from models.message import Message
 from src.api.v1.debs import CurrentUser, SessionDep, get_current_active_superuser
 from models.food_log import FoodLog, FoodLogCreate, FoodLogPublic, FoodLogUpdate, FoodLogsPublic
@@ -115,6 +116,10 @@ def delete_food_log(
 
     session.delete(food_log)
     session.commit()
+
+    # Update summary after deletion
+    update_user_nutrition_summary(session, current_user.id)
+
     return Message(message="Food log deleted successfully")
 
 
