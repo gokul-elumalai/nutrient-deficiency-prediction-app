@@ -1,13 +1,9 @@
 import uuid
-from typing import Any
 
-from pydantic import EmailStr
-from sqlmodel import Session, func, select
+from sqlmodel import Session
 
-from models.food_log import FoodLogCreate, FoodLog, FoodLogPublic
-from src.core.security import get_password_hash, verify_password
-from src.models.message import Message
-from src.models.user import User, UserCreate, UsersPublic, UserUpdate
+from crud.user_details import update_user_nutrition_summary
+from models.food_log import FoodLogCreate, FoodLog
 
 
 def create_food_log(*, session: Session, food_log: FoodLogCreate, user_id: uuid.UUID) -> FoodLog:
@@ -15,6 +11,10 @@ def create_food_log(*, session: Session, food_log: FoodLogCreate, user_id: uuid.
     session.add(db_obj)
     session.commit()
     session.refresh(db_obj)
+
+    # Update summary after insertion
+    update_user_nutrition_summary(session, user_id)
+
     return db_obj
 
 
