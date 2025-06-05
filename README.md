@@ -31,7 +31,7 @@ Visit http://localhost:8000/docs for the interactive API docs.
 
 ### Demo
 
-
+![Project Demo](assets/project-short-demo.gif)
 
 ## 📄 License
 MIT – Free to use, modify, and distribute.
