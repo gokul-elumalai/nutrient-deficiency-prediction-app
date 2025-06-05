@@ -1,4 +1,4 @@
-# Nutrient Deficiency Prediction App
+# Nutrient Deficiency Prediction and Recommendation App
 
 NutriApp is a smart dietary tracking system that helps users log meals, analyze nutrient intake, visualize calorie trends, and receive personalized diet recommendations using machine learning.
 
