@@ -8,8 +8,7 @@ from api.v1.debs import SessionDep
 from core import security
 from core.config import configs
 from crud import user as crud
-from models.jwt_token import Token
-from models.message import Message
+from crud.user import get_user_by_email
 
 router = APIRouter(prefix="/auth", tags=["user"])
 
@@ -21,6 +20,10 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
+    db_user = get_user_by_email(session=session, email=form_data.username)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User doesn't exist")
+
     user = crud.authenticate(
         session=session, email=form_data.username, password=form_data.password
     )
@@ -33,11 +36,7 @@ def login_access_token(
     token = security.create_access_token(user.id, expires_delta=access_token_expires)
 
     return {"token": token, "username": user.full_name, "user_id": user.id}
-    # return Token(
-    #     access_token=security.create_access_token(
-    #         user.id, expires_delta=access_token_expires
-    #     )
-    # )
+
 
 
 @router.post("/login")
